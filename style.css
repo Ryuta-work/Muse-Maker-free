@@ -121,7 +121,7 @@ body {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
-    overflow: hidden; /* 中身がはみ出すのを防ぎます */
+    overflow-y: auto; /* ここを修正 */
 }
 
 h1 {
