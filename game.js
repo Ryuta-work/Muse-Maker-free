@@ -1,3 +1,4 @@
+// game2.js
 (function () {
   const TILE_WIDTH = 512;
   const TILE_HEIGHT = 200;
@@ -7,10 +8,10 @@
     { class: 'bg-hills', speedRatio: 0.50 }, // 山（中速）
   ];
 
-  // ---- ジャンプ物理 ----
-  const GRAVITY = -200;      // px/s^2（下向き）
-  const JUMP_VY = 650;        // 初速（上向き）
-  const MAX_JUMP_HEIGHT = 100;
+  // ---- ジャンプ物理（滞空長め）----
+  const GRAVITY = -200;     // px/s^2（下向き）
+  const JUMP_VY = 650;       // 初速（上向き）
+  const MAX_JUMP_HEIGHT = 80;
 
   // ---- ブースト（5秒／クール13秒）----
   const BOOST_AMOUNT = 30;
@@ -24,24 +25,24 @@
   const MOUNTAIN_STROKE = "#67b759";
 
   // ---- 岩（障害物） ----
-  const PLAYER_X = 40;          // プレイヤーの表示X（.playerのleftと合わせる）
-  const PLAYER_W = 60;          // 衝突用の概算幅（画像幅の近似）
-  const PLAYER_H = 80;          // 衝突用の概算高さ（画像高さの近似）
-  const GROUND_OFFSET = 8;      // bottom: 8px と合わせる
+  const PLAYER_X = 40;          // .player の left と合わせる
+  const PLAYER_W = 60;          // 当たり判定用の概算幅
+  const GROUND_OFFSET = 8;      // .player の bottom と合わせる
 
-  const ROCK_W = 34;            // 岩の幅
-  const ROCK_H_CHOICES = [24, 28, 34, 40]; // 岩の高さパターン
-  const ROCK_MIN_GAP = 380;     // 岩の出現間隔（距離ベース）最小
-  const ROCK_MAX_GAP = 640;     // 岩の出現間隔（距離ベース）最大
-  const ROCK_SPAWN_MARGIN = 80; // 画面右端の少し外でスポーンさせる余裕
+  const ROCK_W = 34;
+  const ROCK_H_CHOICES = [24, 28, 34, 40];
+  const ROCK_MIN_GAP = 380;
+  const ROCK_MAX_GAP = 640;
+  const ROCK_SPAWN_MARGIN = 80;
 
+  // 二次関数（上に凸）で山のSVGを作成（左右に透明余白＝隙間）
   function makeMountainSVG(w, h, heightPx, gapPx) {
     const leftX  = Math.max(0, gapPx / 2);
     const rightX = Math.min(w, w - gapPx / 2);
     const px = (leftX + rightX) / 2;
     const py = Math.max(0, h - heightPx);
     const half = (rightX - leftX) / 2;
-    const a = (h - py) / (half * half); // 上に凸（見た目）
+    const a = (h - py) / (half * half); // 見た目は上に凸
 
     const N = 40;
     const dx = (rightX - leftX) / (N - 1);
@@ -61,6 +62,7 @@
   }
 
   const Game = {
+    // ラン状態
     distance: 0,
     baseSpeed: 90,
     speed: 90,
@@ -84,9 +86,7 @@
 
     // 障害物（岩）
     rocks: [],                // [{x, h, el, hit}]
-    nextRockAt: 600,          // 次の岩を出す距離（distance基準）
-
-    // 当たり回数
+    nextRockAt: 600,          // 次の岩を出す距離
     hitCount: 0,              // 3でゲームオーバー
 
     // UI
@@ -96,10 +96,22 @@
     distanceDisplay: null,
     speedDisplay: null,
 
+    // 最高記録（タブを閉じるまで保持）
+    bestDistance: 0,             // 実数(px)
+    bestAtRunStart: 0,
+    bestAnnouncedThisRun: false,
+
     init() {
       this.cacheDom();
       this.bindEvents();
       this.buildLayers();
+
+      // sessionStorage から最高記録をロード
+      const saved = sessionStorage.getItem('miniGameBestPx');
+      this.bestDistance = saved ? parseFloat(saved) : 0;
+      this.bestAtRunStart = this.bestDistance;
+      this.bestAnnouncedThisRun = false;
+
       this.updateInfo();
 
       // キャラ
@@ -115,9 +127,13 @@
 
     cacheDom() {
       this.gameBoard = document.getElementById('game-board');
+
+      // ゲーム用チャット
       this.chatHistory   = document.getElementById('game-chat-history');
       this.promptInput   = document.getElementById('game-prompt-input');
       this.sendBtn       = document.getElementById('game-send-btn');
+
+      // 情報表示
       this.distanceDisplay = document.getElementById('distance');
       this.speedDisplay    = document.getElementById('speed');
     },
@@ -146,11 +162,11 @@
 
     handleCommand(msg) {
       if (msg === 'すたーと') {
-        this.restart();
+        this.restart();                   // ← 開始は「すたーと」だけ
       } else if (msg === 'がんばれ') {
-        this.tryBoost();
+        this.tryBoost();                  // 非稼働なら開始しない
       } else if (msg === 'じゃんぷ') {
-        this.jump();
+        this.jump();                      // 非稼働なら開始しない
       }
     },
 
@@ -163,14 +179,11 @@
     },
 
     restart() {
-      // ゲーム開始・再開時の初期化
+      // 背景・障害物・状態を初期化
       this.clearRocks();
       this.hitCount = 0;
-
-      // レイヤーを初期位置へ
       this.layers.forEach(l => { l.offset = 0; l.el.style.transform = 'translateX(0px)'; });
 
-      // ステータス初期化
       this.distance = 0;
       this.baseSpeed = 90;
       this.speed = 90;
@@ -178,13 +191,17 @@
       this.playerVY = 0;
       this.onGround = true;
 
-      // ブースト解除
       this.boostActive = false;
       this.boostEndTime = 0;
       this.cooldownEndTime = 0;
 
-      // 岩のスポーン予定をリセット
       this.nextRockAt = 600;
+
+      // 最高記録を最新ロード＆アナウンスリセット
+      const saved = sessionStorage.getItem('miniGameBestPx');
+      this.bestDistance = saved ? parseFloat(saved) : this.bestDistance || 0;
+      this.bestAtRunStart = this.bestDistance;
+      this.bestAnnouncedThisRun = false;
 
       this.addChatMessage('レース開始！ 障害物に3回当たるとリセットされます。', 'system');
       this.applyPlayerTransform();
@@ -192,10 +209,13 @@
       this.startLoop();
     },
 
+    // ---- ブースト（非稼働時は開始しない）----
     tryBoost() {
+      if (!this.isRunning) {
+        this.addChatMessage('まず「すたーと」で開始してね。', 'system');
+        return;
+      }
       const now = performance.now();
-      if (!this.isRunning) this.restart();
-
       if (now < this.cooldownEndTime) {
         const remain = Math.ceil((this.cooldownEndTime - now) / 1000);
         this.addChatMessage(`クールタイム中… 残り ${remain} 秒`, 'system');
@@ -207,11 +227,14 @@
       this.speed = this.baseSpeed + BOOST_AMOUNT;
       this.addChatMessage(`加速！（${BOOST_DURATION_MS/1000} 秒）`, 'system');
       this.updateInfo();
-      this.startLoop();
     },
 
+    // ---- ジャンプ（非稼働時は開始しない）----
     jump() {
-      if (!this.isRunning) this.restart();
+      if (!this.isRunning) {
+        this.addChatMessage('まず「すたーと」で開始してね。', 'system');
+        return;
+      }
       if (this.onGround) {
         this.onGround = false;
         this.playerVY = JUMP_VY;
@@ -230,10 +253,21 @@
         this.updateInfo();
       }
 
-      // 距離更新
+      // 距離
       this.distance += this.speed * dt;
 
-      // レイヤースクロール（タイルリサイクルでシームなし）
+      // 最高記録の更新
+      if (this.distance > this.bestDistance) {
+        const prevBest = this.bestDistance;
+        this.bestDistance = this.distance;
+        sessionStorage.setItem('miniGameBestPx', String(this.bestDistance));
+        if (!this.bestAnnouncedThisRun && prevBest <= this.bestAtRunStart) {
+          this.bestAnnouncedThisRun = true;
+          this.addChatMessage(`最高記録更新！ ${Math.floor(this.bestDistance)} km`, 'system');
+        }
+      }
+
+      // 背景スクロール（タイルリサイクルでシームなし）
       this.layers.forEach(layer => {
         layer.offset -= this.speed * layer.speedRatio * dt;
 
@@ -243,6 +277,8 @@
           const first = layer.el.firstElementChild;
           if (first) {
             layer.el.appendChild(first);
+
+            // 山は右端へ回した瞬間に次の高さを決定
             if (layer.el.classList.contains('bg-hills')) {
               const hChoice = MOUNTAIN_HEIGHT_CHOICES[
                 Math.floor(Math.random() * MOUNTAIN_HEIGHT_CHOICES.length)
@@ -259,7 +295,7 @@
         layer.el.style.transform = `translateX(${layer.offset}px)`;
       });
 
-      // 岩のスポーン・更新・当たり判定
+      // 岩（生成・移動・衝突）
       this.updateRocks(dt);
 
       // ジャンプ更新
@@ -291,51 +327,53 @@
     updateInfo() {
       if (this.distanceDisplay) this.distanceDisplay.textContent = Math.floor(this.distance);
       if (this.speedDisplay)    this.speedDisplay.textContent = Math.floor(this.speed);
+      const bestEl = document.getElementById('best');
+      if (bestEl) bestEl.textContent = Math.floor(this.bestDistance);
     },
 
     /* ==================== 岩：生成・描画・衝突 ==================== */
-    updateRocks(dt) {
+    updateRocks() {
       const boardWidth = this.gameBoard?.clientWidth || 1100;
 
-      // スポーン（距離ベース）
+      // 出現（距離ベース）
       if (this.distance >= this.nextRockAt) {
         this.spawnRock(this.distance + boardWidth + ROCK_SPAWN_MARGIN);
         const gap = randInt(ROCK_MIN_GAP, ROCK_MAX_GAP);
         this.nextRockAt += gap;
       }
 
-      // 描画＆衝突＆掃除
+      // 更新
       for (let i = this.rocks.length - 1; i >= 0; i--) {
         const r = this.rocks[i];
 
         // 画面X = ワールドX - 距離
         const screenX = r.x - this.distance;
 
-        // 画面外へ出た岩を削除
+        // 画面外で除去
         if (screenX + ROCK_W < -50) {
           r.el.remove();
           this.rocks.splice(i, 1);
           continue;
         }
 
-        // 表示更新
+        // 表示
         r.el.style.transform = `translateX(${Math.round(screenX)}px)`;
 
-        // 衝突判定（単純なAABB）
+        // 衝突（AABB）
         if (!r.hit) {
-          const playerBottom = GROUND_OFFSET + this.playerY; // 地面からの高さ
+          const playerBottom = GROUND_OFFSET + this.playerY;
           const playerLeft   = PLAYER_X;
           const playerRight  = PLAYER_X + PLAYER_W;
 
           const rockLeft  = screenX;
           const rockRight = screenX + ROCK_W;
-          const rockTop   = GROUND_OFFSET + r.h; // 岩の上端
+          const rockTop   = GROUND_OFFSET + r.h;
 
           const xOverlap = !(playerRight < rockLeft || rockRight < playerLeft);
-          const yOverlap = playerBottom < rockTop; // プレイヤーの足元が岩より低い＝ぶつかる
+          const yOverlap = playerBottom < rockTop;
 
           if (xOverlap && yOverlap) {
-            r.hit = true; // 多重ヒット防止
+            r.hit = true;
             this.onHitObstacle();
           }
         }
@@ -348,7 +386,7 @@
       el.className = 'rock';
       el.style.width  = `${ROCK_W}px`;
       el.style.height = `${h}px`;
-      el.style.left   = `0px`;            // transformで動かす
+      el.style.left   = `0px`;            // transform で動かす
       el.style.bottom = `${GROUND_OFFSET}px`;
       this.gameBoard.appendChild(el);
 
@@ -366,26 +404,21 @@
       this.addChatMessage(`岩に当たった！ (${this.hitCount}/3)`, 'system');
 
       if (this.hitCount >= 3) {
-        // ゲームオーバー → 初期地点へ戻して停止
+        // ゲームオーバー → 停止＆初期化
         this.isRunning = false;
 
-        // 状態を初期へ
         this.speed = this.baseSpeed;
         this.playerY = 0; this.playerVY = 0; this.onGround = true;
         this.applyPlayerTransform();
 
-        // 距離と表示を0へ
+        // 距離0に戻す（最高記録は保持）
         this.distance = 0;
         this.updateInfo();
 
-        // レイヤー位置リセット
+        // レイヤー位置・岩・ブーストをリセット
         this.layers.forEach(l => { l.offset = 0; l.el.style.transform = 'translateX(0px)'; });
-
-        // 岩を全削除＆スポーン計画リセット
         this.clearRocks();
         this.nextRockAt = 600;
-
-        // ブースト解除
         this.boostActive = false;
         this.boostEndTime = 0;
         this.cooldownEndTime = 0;
