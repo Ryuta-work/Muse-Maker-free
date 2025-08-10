@@ -239,11 +239,35 @@ window.addEventListener('load', () => {
 
     async function handleCopyToClipboard(imageUrl) {
         try {
+            // 1. 画像の元データ(Blob)を取得
             const blob = await fetch(imageUrl).then(res => res.blob());
+
+            // 2. 画像をPNGに変換するための準備 (Canvasを使用)
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            // 3. 画像データを読み込んでCanvasに描画
+            const img = new Image();
+            // Promiseを使って画像の読み込み完了を待つ
+            await new Promise((resolve, reject) => {
+                img.onload = () => resolve();
+                img.onerror = (err) => reject(err);
+                img.src = URL.createObjectURL(blob);
+            });
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+
+            // 4. Canvasの内容をPNG形式のBlobとして取得
+            const pngBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+
+            // 5. PNGに変換したデータをクリップボードに書き込む
             await navigator.clipboard.write([
-                new ClipboardItem({ [blob.type]: blob })
+                new ClipboardItem({ 'image/png': pngBlob })
             ]);
+
             addSystemMessage('画像をクリップボードにコピーしました！', currentRoom);
+
         } catch (error) {
             console.error('コピー失敗:', error);
             addErrorMessage('クリップボードへのコピーに失敗しました。', currentRoom);
