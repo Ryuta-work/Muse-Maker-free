@@ -374,6 +374,8 @@
 
           if (xOverlap && yOverlap) {
             r.hit = true;
+            r.el.remove();
+            this.rocks.splice(i, 1);
             this.onHitObstacle();
           }
         }
