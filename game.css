@@ -1,0 +1,146 @@
+/* ===== パララックス背景（地面なし） ===== */
+
+#game-container{
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:12px;
+  font-size:24px;
+}
+
+/* ★ 操作説明（ゲーム画面の上・1行） */
+.game-instruction{
+  width:100%;
+  max-width:1100px;
+  box-sizing:border-box;
+  padding:8px 12px;
+  border:1px solid #e6e6e6;
+  border-radius:10px;
+  background:#fff;
+  text-align:center;
+  font-size:16px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+#game-board{
+  position:relative;
+  width:100%;
+  max-width:1100px;
+  height:200px;
+  overflow:hidden;
+  background:linear-gradient(#bde3ff, #dff1ff); /* 空の下地 */
+  border:1px solid #e6e6e6;
+  border-radius:12px;
+}
+
+/* タイル幅を1か所で統一 */
+:root{
+  --tile-width:512px;
+  --tile-height:200px;
+}
+
+/* レイヤー共通 */
+.parallax{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:row;
+  align-items:stretch;
+  will-change:transform;
+  pointer-events:none;
+}
+.parallax .tile{
+  flex:0 0 auto;
+  width:var(--tile-width);
+  height:var(--tile-height);
+  background-repeat:repeat-x;
+  background-size:var(--tile-width) var(--tile-height) !important;
+}
+
+/* 雲（遠景） */
+.bg-sky .tile{
+  background-image:
+    radial-gradient(circle at 20% 40%, rgba(255,255,255,0.8) 0 25px, transparent 26px),
+    radial-gradient(circle at 70% 30%, rgba(255,255,255,0.7) 0 22px, transparent 23px),
+    radial-gradient(circle at 40% 70%, rgba(255,255,255,0.75) 0 18px, transparent 19px);
+  background-size:
+    var(--tile-width) var(--tile-height),
+    var(--tile-width) var(--tile-height),
+    var(--tile-width) var(--tile-height);
+  opacity:.6;
+}
+
+
+/* 丘（中景）— 旧グラデーションを無効化し、SVG背景を使う */
+.bg-hills .tile{
+  background: none;                 /* JSで data:SVG を貼る */
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: var(--tile-width) var(--tile-height);
+}
+
+/* 岩（障害物） */
+.rock{
+  position:absolute;
+  left:0;                /* JSでtransformで動かす */
+  bottom:8px;            /* 地面合わせ */
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255,255,255,0.35) 0 8px, transparent 9px),
+    radial-gradient(circle at 65% 60%, rgba(0,0,0,0.25) 0 10px, transparent 11px),
+    linear-gradient(#8a8f94, #60656a);
+  border:1px solid #4e5256;
+  border-radius:8px;
+  box-shadow: 0 2px 0 rgba(0,0,0,0.25);
+  will-change: transform;
+  z-index: 9;            /* キャラ(10)の下、背景の上 */
+}
+
+
+/* キャラ（前面固定） */
+.player{
+  position:absolute;
+  left: 40px;
+  bottom: 8px;
+  height: 96px;
+  z-index: 10;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* ===== ゲーム情報・入力欄・ログの縦並び ===== */
+
+/* 距離・速度 */
+#game-controls{
+  display:flex;
+  gap:20px;
+  justify-content:center;
+}
+
+/* 入力欄（距離/速度の下） */
+#game-input-row{
+  width:100%;
+  max-width:600px;
+  margin:0 auto;
+}
+
+/* ログ（入力欄の下） */
+#chat-area-game{
+  width:100%;
+  max-width:600px;
+  margin:0 auto;
+}
+#game-chat-history{
+  border:1px solid #e6e6e6;
+  border-radius:10px;
+  padding:8px 12px;
+  background:#fff;
+  max-height:180px;
+  overflow-y:auto;
+}
+

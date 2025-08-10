@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>TUI Image Editor - 単体テスト</title>
+    <link rel="stylesheet" href="https://uicdn.toast.com/tui-image-editor/latest/tui-image-editor.css">
+    <style>
+        /* このテストページだけの最小限のスタイル */
+        body { margin: 20px; font-family: sans-serif; }
+        #editor-wrapper { width: 1000px; height: 800px; }
+    </style>
+</head>
+<body>
+
+    <h1>画像編集ライブラリ 単体テスト</h1>
+    <p>
+        この下に画像編集ツールが正常に表示されれば、ライブラリ自体はあなたの環境で動作しています。<br>
+        その場合、原因は元のアプリの <b>style.css</b> ファイルとの競合がほぼ確定します。
+    </p>
+
+    <div id="editor-wrapper"></div>
+
+    <script src="https://uicdn.toast.com/tui-image-editor/latest/tui-image-editor.js"></script>
+
+    <script>
+        new tui.ImageEditor('#editor-wrapper', {
+            includeUI: {
+                // CORS問題が絶対に発生しない、公式のサンプル画像を使う
+                loadImage: {
+                    path: 'https://nhn.github.io/tui.image-editor/latest/dist/img/sampleImage.jpg',
+                    name: 'SampleImage'
+                },
+                initMenu: 'filter',
+                menuBarPosition: 'bottom'
+            },
+            cssMaxWidth: 700,
+            cssMaxHeight: 500,
+            usageStatistics: false
+        });
+    </script>
+</body>
+</html>

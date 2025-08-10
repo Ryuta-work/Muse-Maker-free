@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Generator - ようこそ</title>
+    <link rel="stylesheet" href="title.css">
+</head>
+<body>
+    <div class="title-container">
+        <img src="logo_2.png" alt="Muse Maker Logo" class="title-logo">
+        <h1>AI Generator</h1>
+        <p>どのツールを使いますか？</p>
+        <div class="room-selection">
+            <a href="chat.html?room=image" class="room-card">
+                <h2>🖼️ 静止画生成</h2>
+                <p>テキストから一枚の画像を生成します。</p>
+            </a>
+            <a class="room-card disabled">
+                <h2>🎞️ GIF画像生成</h2>
+                <p>テキストからアニメーションGIFを生成します。</p>
+            </a>
+            <a class="room-card disabled">
+                <h2>🎵 音楽生成</h2>
+                <p>テキストから音楽を生成します。</p>
+            </a>
+            <a class="room-card disabled">
+                <h2>🎬 動画像生成</h2>
+                <p>画像と音楽を組み合わせて動画像を生成します。</p>
+            </a>
+            <a class="room-card disabled">
+                <h2>🔁 ループ動画生成</h2>
+                <p>BGM付きのループ動画を生成します。</p>
+            </a>
+            <a href="chat.html?room=game" class="room-card">
+                <h2>🕹️ ミニゲーム</h2>
+                <p>生成の待ち時間に簡単なゲームで遊べます。</p>
+            </a>
+            </div>
+    </div>
+    
+    <div class="birth-animation-container" id="birth-animation-container">
+        <div class="light-particle"></div>
+        <img src="logo_mojinasi.png" alt="ロゴベース" class="logo-base">
+        <img src="logo_omeme_kaizoudo.png" alt="ロゴ完成版" class="logo-eye" id="logo-eye">
+        <img src="logo_wink.png" alt="ロゴウインク版" class="logo-wink" id="logo-wink">
+
+        <div class="speech-bubble" id="speech-bubble">
+             <p id="speech-text">トークルームを選択してね♪</p>
+        </div>
+    </div>
+    <script>
+        // 以下のスクリプトは変更なし
+        const logoContainer = document.getElementById('birth-animation-container');
+        const logoEye = document.getElementById('logo-eye');
+        const logoWink = document.getElementById('logo-wink');
+        const speechText = document.getElementById('speech-text');
+        let isWinking = false;
+        let isCoolingDown = false;
+        const originalText = 'トークルームを選択してね♪';
+        const winkText = 'いろんな映像を作ってね♪';
+        setTimeout(() => {
+            logoEye.classList.add('intro-finished');
+        }, 6000);
+        logoContainer.addEventListener('click', () => {
+            if (isCoolingDown) {
+                return;
+            }
+            if (isWinking) {
+                logoEye.style.display = 'block';
+                logoWink.style.display = 'none';
+                speechText.textContent = originalText;
+                isWinking = false;
+            } else {
+                logoEye.style.display = 'none';
+                logoWink.style.display = 'block';
+                speechText.textContent = winkText;
+                isWinking = true;
+            }
+            isCoolingDown = true;
+            setTimeout(() => {
+                isCoolingDown = false;
+            }, 1000);
+        });
+    </script>
+    </body>
+</html>

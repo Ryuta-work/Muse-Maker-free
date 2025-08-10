@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Generator</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="game.css">
+</head>
+<body>
+    <div class="app-layout">
+        <button id="sidebar-toggle-btn">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <button id="home-btn">🏠</button>
+        <nav id="sidebar" class="hotbar">
+            <button class="nav-btn active" data-room="image">🖼️ 静止画生成</button>
+            <button class="nav-btn" data-room="gif" disabled title="この機能は現在利用できません">🎞️ GIF生成</button>
+            <button class="nav-btn" data-room="music" disabled title="この機能は現在利用できません">🎵 音楽生成</button>
+            <button class="nav-btn" data-room="video" disabled title="この機能は現在利用できません">🎬 動画生成</button>
+            <button class="nav-btn" data-room="loop_video" disabled title="この機能は現在利用できません">🔁 ループ動画生成</button>
+            <button class="nav-btn" data-room="game">🕹️ ミニゲーム</button>
+        </nav>
+
+        <div class="container">
+            <h1 id="room-title">AI Image Generator</h1>
+            
+            <div id="chat-area">
+                <div id="chat-history-image" class="chat-history-panel active-panel">
+                    <p class="system-message">静止画生成ルームへようこそ！</p>
+                </div>
+                <div id="chat-history-gif" class="chat-history-panel"></div>
+                <div id="chat-history-music" class="chat-history-panel"></div>
+                <div id="chat-history-video" class="chat-history-panel"></div>
+                <div id="chat-history-loop_video" class="chat-history-panel"></div>
+
+                <div class="input-area">
+                    <input type="text" id="prompt-input" placeholder="作りたい画像の日本語プロンプトを入力">
+                    <button id="send-btn">送信</button>
+                    </div>
+                <div id="loading" class="hidden">
+                    <div class="spinner"></div>
+                    <p>生成中です...</p>
+                </div>
+            </div>
+            
+            <div id="game-container" class="hidden">
+                
+                <div id="game-instruction" class="game-instruction">
+                    指示：「すたーと」で開始 / 「がんばれ」で加速 / 「じゃんぷ」でジャンプ
+                </div>
+ 
+                <div id="game-board"></div>
+ 
+                <div id="game-controls">
+                    <p>距離: <span id="distance">0</span></p>
+                    <p>速度: <span id="speed">0</span> px/s</p>
+                </div>
+ 
+                <!-- ★ プロンプト入力（ログの上に移動） -->
+                <div id="game-input-row" class="input-area">
+                    <input
+                      type="text"
+                      id="game-prompt-input"
+                      placeholder="ミュウちゃんへ指示"
+                    >
+                    <button id="game-send-btn">送信</button>
+                </div>
+ 
+                <!-- ★ ログ（入力欄の下に移動） -->
+                <div id="chat-area-game">
+                    <div id="game-chat-history"></div>
+                </div>
+
+                 </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script> 
+    <script src="script.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>

@@ -1,0 +1,158 @@
+/* =======================================
+   title.css 最終版 (簡易版修正)
+   ======================================= */
+
+/* --- アニメーションの定義 --- */
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- 全体のスタイル --- */
+body {
+    font-family: 'Helvetica Neue', 'Arial', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', sans-serif;
+    background: linear-gradient(to bottom, #e0eafc, #ffffff);
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 2rem 1rem;
+    text-align: center;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
+.title-container {
+    max-width: 900px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.title-logo {
+    width: 80%;
+    max-width: 500px;
+    height: auto;
+    margin-bottom: 2rem;
+    animation: fadeInDown 1s ease-out forwards;
+}
+
+h1, .title-container > p { display: none; }
+
+.room-selection {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap; /* 画面幅に応じて自動で折り返す */
+    width: 100%;
+}
+
+.room-card {
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 1.5rem 1rem;
+    width: 200px;
+    text-decoration: none;
+    color: #333;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    opacity: 0;
+    animation: fadeInUp 0.8s ease-out forwards;
+    flex-shrink: 0;
+    position: relative; /* 擬似要素のために追加 */
+}
+.room-card:nth-child(1) { animation-delay: 0.5s; }
+.room-card:nth-child(2) { animation-delay: 0.6s; }
+.room-card:nth-child(3) { animation-delay: 0.7s; }
+.room-card:nth-child(4) { animation-delay: 0.8s; }
+.room-card:nth-child(5) { animation-delay: 0.9s; }
+.room-card:nth-child(6) { animation-delay: 1.0s; }
+
+.room-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* ▼▼▼ ここから追加 ▼▼▼ */
+.room-card.disabled {
+    cursor: not-allowed;
+    filter: grayscale(80%);
+}
+
+.room-card.disabled:hover {
+    transform: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.room-card.disabled::before {
+    content: '✖';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 5rem;
+    color: white;
+    background-color: rgba(40, 40, 40, 0.7);
+    border-radius: 12px;
+    z-index: 1;
+    text-shadow: 0 0 5px black;
+}
+/* ▲▲▲ ここまで追加 ▲▲▲ */
+
+
+.room-card h2 {
+    margin-top: 0;
+    font-size: 1.2rem;
+    color: #111;
+}
+
+.room-card p {
+    font-size: 0.9rem;
+    color: #555;
+    line-height: 1.4;
+}
+
+/* --- 誕生アニメーション関連 (変更なし) --- */
+@keyframes puyo-float{0%{transform:translateY(0) scale(1,1)}50%{transform:translateY(-8px) scale(.95,1.05)}100%{transform:translateY(0) scale(1,1)}}@keyframes fade-out{to{opacity:0}}@keyframes particle-gathering{0%{transform:scale(3);opacity:0;box-shadow:0 0 10px 5px #fff,0 0 20px 10px #f0e68c,0 0 40px 20px #ffd700}50%{opacity:1}100%{transform:scale(.1);opacity:0;box-shadow:0 0 50px 25px #fff,0 0 100px 50px #f0e68c,0 0 150px 75px #ffd700}}@keyframes base-logo-appear{0%{opacity:0;transform:scale(.8);filter:blur(10px)}100%{opacity:1;transform:scale(1);filter:blur(0)}}@keyframes eye-logo-birth{0%,50%{opacity:0;transform:scale(.9);filter:brightness(3) blur(15px)}70%{opacity:1;transform:scale(1.1);filter:brightness(2) blur(0) drop-shadow(0 0 15px #fff)}100%{opacity:1;transform:scale(1);filter:brightness(1) blur(0) drop-shadow(0 0 5px hsla(0,0%,100%,.5))}}
+.birth-animation-container{position:relative;margin-top:50px;width:300px;height:150px;display:flex;justify-content:center;align-items:center}.light-particle{position:absolute;width:10px;height:10px;background-color:#fff;border-radius:50%;opacity:0;animation:particle-gathering 1.5s ease-in-out forwards;animation-delay:2s}.logo-base{position:absolute;width:300px;height:auto;opacity:0}.logo-eye{position:absolute;width:400px;height:auto;opacity:0}.logo-base{animation:base-logo-appear 1s ease-out forwards,fade-out .5s ease-out forwards;animation-delay:3.3s,4.5s}.logo-eye{position:absolute;width:415px;height:auto;opacity:0;animation:eye-logo-birth 1.5s ease-out forwards,puyo-float 3s ease-in-out infinite;animation-delay:4.5s,6s}.logo-eye.intro-finished{opacity:1;animation:puyo-float 3s ease-in-out infinite}@keyframes bubble-appear{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}.speech-bubble{position:absolute;top:-50px;left:260px;background-color:#fff;padding:12px 18px;border-radius:15px;box-shadow:0 4px 15px rgba(0,0,0,.15);opacity:0;animation:bubble-appear .8s ease-out forwards,puyo-float 3s ease-in-out infinite;animation-delay:7s,7s}.speech-bubble p{margin:0;padding:0;font-size:16px;font-weight:700;color:#333;white-space:nowrap}.speech-bubble::after{content:'';position:absolute;bottom:5px;left:-10px;width:0;height:0;border:12px solid transparent;border-top-color:#fff;transform:rotate(135deg)}.logo-wink{position:absolute;width:600px;height:auto;pointer-events:none;display:none;animation:puyo-float 3s ease-in-out infinite}
+
+/* ▼▼▼ ここからレスポンシブ対応 ▼▼▼ */
+@media (max-width: 768px) {
+    .room-card {
+        width: 150px;
+        padding: 1rem 0.8rem;
+    }
+    .room-card h2 {
+        font-size: 1rem;
+    }
+    .room-card p {
+        font-size: 0.8rem;
+    }
+    .birth-animation-container {
+        transform: scale(0.8);
+    }
+}
+@media (max-width: 480px) {
+    .room-selection {
+        flex-direction: column;
+        align-items: center;
+    }
+    .room-card {
+        width: 80%;
+        max-width: 300px;
+    }
+}

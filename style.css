@@ -1,0 +1,353 @@
+/* ===================
+   style.css 最終版
+   =================== */
+
+/* --- 基本設定 --- */
+body {
+    font-family: sans-serif;
+    background-color: #f4f4f9;
+    color: #333;
+    margin: 0;
+    overflow: auto; /* スクロールを許可 */
+    font-size: 40px; /* 基本のフォントサイズを調整 */
+}
+
+.app-layout {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+    overflow-x: hidden; /* 横スクロールを防止 */
+}
+
+/* --- サイドバー --- */
+#sidebar {
+    background-color: #2c3e50;
+    padding: 1rem;
+    padding-top: 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 250px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+    box-sizing: border-box;
+}
+
+#sidebar.open {
+    transform: translateX(0);
+}
+
+.nav-btn {
+    position: relative; /* 通知の基準位置 */
+    background-color: #495057;
+    color: white;
+    border: none;
+    padding: 12px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: left;
+    transition: background-color 0.3s;
+    font-size: 16px;
+}
+
+.nav-btn.active, .nav-btn:hover {
+    background-color: #007bff;
+}
+
+/* --- ハンバーガーメニュー & ホームボタン --- */
+#sidebar-toggle-btn {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    width: 40px;
+    height: 40px;
+    background: #34495e;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+}
+
+#sidebar-toggle-btn span {
+    display: block;
+    width: 25px;
+    height: 3px;
+    background: white;
+    border-radius: 2px;
+}
+
+#home-btn {
+    position: fixed;
+    top: 15px;
+    left: 70px;
+    width: 40px;
+    height: 40px;
+    background: #34495e;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    z-index: 1001;
+    font-size: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.3s;
+}
+
+#home-btn:hover {
+    background-color: #4e6a85;
+}
+
+/* --- メインコンテンツ --- */
+.container {
+    background: white;
+    width: 100%;
+    box-sizing: border-box;
+    transition: margin-left 0.3s ease;
+
+    padding: 0; /* ★変更：paddingを一旦リセット */
+    margin-left: 0;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    overflow: hidden; /* 中身がはみ出すのを防ぎます */
+}
+
+h1 {
+    color: #5a5a5a;
+    padding-top: 1.5rem; /* ★変更：margin-topからpaddingに変更 */
+    margin: 0 1.5rem 1rem; /* ★変更：左右の余白をpaddingからmarginに変更 */
+    text-align: center;
+    font-size: 1.8rem;
+}
+
+#chat-area {
+    position: relative; 
+    flex-grow: 1;
+    /* ▼ CHANGE THIS LINE ▼ */
+    padding: 0 1.5rem; /* Remove bottom padding */
+    display: flex;
+    flex-direction: column;
+    /* ADD THIS LINE to prevent content from overflowing oddly */
+    overflow: hidden;
+    min-height: 0;
+}
+
+.chat-history-panel {
+    flex-grow: 1;
+    overflow-y: auto;
+    /* ★変更：残りのスタイルは変更なし */
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    display: none;
+    flex-direction: column;
+}
+
+.chat-history-panel.active-panel {
+    display: flex;
+}
+
+/* --- メッセージスタイル --- */
+.user-message, .system-message, .error-message {
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    max-width: 80%;
+    line-height: 1.5;
+    word-wrap: break-word;
+}
+
+.image-container, .audio-container, .video-container {
+    padding: 8px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    max-width: 80%;
+    background-color: #f8f9fa;
+    border: 1px solid #eee;
+    align-self: flex-start;
+    position: relative;
+}
+
+.user-message {
+    background-color: #007bff;
+    color: white;
+    align-self: flex-end;
+}
+
+.system-message {
+    background-color: #e7f3fe;
+    color: #1c7ed6;
+    font-size: 0.9rem;
+    align-self: center;
+    text-align: center;
+}
+
+.error-message {
+    background-color: #ffebee;
+    color: #d32f2f;
+    align-self: center;
+}
+
+.image-container img, .video-container video {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    display: block;
+}
+
+.audio-container audio {
+    width: 100%;
+}
+
+.button-group {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    display: flex;
+    gap: 8px;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 8px;
+    border-radius: 8px;
+    z-index: 10;
+}
+.button-group button {
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+/* --- 入力エリア --- */
+.input-area {
+    /* ▼ ADD THIS LINE ▼ */
+    flex-shrink: 0; /* Prevents the input area from shrinking */
+
+    display: flex;
+    gap: 10px;
+    background: white; 
+    /* ▼ CHANGE THIS LINE to give it its own vertical padding ▼ */
+    padding: 1rem 0; 
+    box-sizing: border-box;
+}
+
+.input-area input {
+    flex-grow: 1;
+    padding: 0.8rem;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    font-size: 1rem;
+}
+
+.input-area button {
+    background-color: #007bff;
+    color: white;
+    padding: 0.8rem 1.2rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    white-space: nowrap;
+}
+.input-area button:hover:not(:disabled) {
+    background-color: #0056b3;
+}
+.input-area button:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+/* --- ローディング & 通知 --- */
+.hidden { display: none !important; }
+#loading {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 2s linear infinite;
+    margin-bottom: 0.5rem;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.notification-popup {
+    position: absolute;
+    top: 5px;
+    right: 8px;
+    background-color: #e74c3c;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+    z-index: 10;
+    pointer-events: none;
+    animation: pulse-animation 1.5s infinite;
+}
+@keyframes pulse-animation {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); }
+    70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+}
+
+/* ▼▼▼ ここからレスポンシブ対応 ▼▼▼ */
+@media (max-width: 768px) {
+    body {
+        font-size: 14px;
+    }
+    
+    .app-layout {
+        /* サイドバーが開いた時にメインコンテンツをずらさないように */
+        margin-left: 0 !important;
+    }
+
+    .container {
+        padding: 0.8rem;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+        margin-top: 60px;
+        margin-bottom: 0.8rem;
+    }
+
+    .input-area {
+        flex-direction: column;
+    }
+
+    .input-area input, .input-area button {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .user-message, .image-container, .audio-container, .video-container {
+        max-width: 90%;
+    }
+}
+
+.container.sidebar-open {
+    margin-left: 250px; /* サイドバーの幅と同じ値 */
+}
